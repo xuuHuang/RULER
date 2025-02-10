@@ -32,4 +32,12 @@ Templates = {
     'meta-llama3': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n{task_template}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
     
     'jamba': "<|startoftext|><|bom|><|system|> <|eom|><|bom|><|user|> {task_template}<|eom|><|bom|><|assistant|>",
+
+    'qwen2.5': "<|im_start|>system\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\n<|im_start|>user\n{task_template}<|im_end|>\n<|im_start|>assistant\n",
+
+    'internlm2.5': "<|im_start|>user\n{task_template}<|im_end|>\n<|im_start|>assistant\n",
+
+    'aya-expanse': "<|START_OF_TURN_TOKEN|><|USER_TOKEN|>{task_template}<|END_OF_TURN_TOKEN|><|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>",
+
+    'deepseek-v3': "<｜begin▁of▁sentence｜><｜User｜>{task_template}<｜Assistant｜>",
 }

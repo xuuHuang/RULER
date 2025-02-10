@@ -33,11 +33,24 @@ from pathlib import Path
 from tqdm import tqdm
 import random
 import numpy as np
-from nemo.collections.asr.parts.utils.manifest_utils import read_manifest, write_manifest
+# from nemo.collections.asr.parts.utils.manifest_utils import read_manifest, write_manifest
 import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")) 
 from tokenizer import select_tokenizer
 
+def write_manifest(output_path, target_manifest, ensure_ascii=True):
+    """
+    Write to manifest file
+
+    Args:
+        output_path (str or Path): Path to output manifest file
+        target_manifest (list): List of manifest file entries
+        ensure_ascii (bool): default is True, meaning the output is guaranteed to have all incoming non-ASCII characters escaped. If ensure_ascii is false, these characters will be output as-is.
+    """
+    with open(output_path, "w", encoding="utf-8") as outfile:
+        for tgt in target_manifest:
+            json.dump(tgt, outfile, ensure_ascii=ensure_ascii)
+            outfile.write('\n')
 
 parser = argparse.ArgumentParser()
 # Basic Configurations
@@ -53,6 +66,7 @@ parser.add_argument("--pre_samples", type=int, default=0, help='number of sample
 parser.add_argument("--random_seed", type=int, default=42)
 parser.add_argument("--template", type=str, required=True, help='prompt template')
 parser.add_argument("--remove_newline_tab", action='store_true', help='remove `\n` and `\t` in all strings.')
+parser.add_argument("--language", type=str, default='en', help='The language of the text')
 
 # Complexity Configurations
 parser.add_argument("--dataset", type=str, required=True, help='dataset file')
@@ -204,7 +218,7 @@ def main():
         save_dir=args.save_dir
     )
     
-    write_manifest(save_file, write_jsons)
+    write_manifest(save_file, write_jsons, False)
 
 if __name__=="__main__":
     main()

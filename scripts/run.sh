@@ -57,6 +57,7 @@ if [ -z "${TASKS}" ]; then
     exit 1
 fi
 
+LANG=${3}
 
 # Start server (you may want to run in other container.)
 if [ "$MODEL_FRAMEWORK" == "vllm" ]; then
@@ -88,7 +89,7 @@ fi
 total_time=0
 for MAX_SEQ_LENGTH in "${SEQ_LENGTHS[@]}"; do
     
-    RESULTS_DIR="${ROOT_DIR}/${MODEL_NAME}/${BENCHMARK}/${MAX_SEQ_LENGTH}"
+    RESULTS_DIR="${ROOT_DIR}/${MODEL_NAME}/${BENCHMARK}/${LANG}/${MAX_SEQ_LENGTH}"
     DATA_DIR="${RESULTS_DIR}/data"
     PRED_DIR="${RESULTS_DIR}/pred"
     mkdir -p ${DATA_DIR}
@@ -104,6 +105,8 @@ for MAX_SEQ_LENGTH in "${SEQ_LENGTHS[@]}"; do
             --max_seq_length ${MAX_SEQ_LENGTH} \
             --model_template_type ${MODEL_TEMPLATE_TYPE} \
             --num_samples ${NUM_SAMPLES} \
+            --language ${LANG} \
+            --subset test \
             ${REMOVE_NEWLINE_TAB}
         
         start_time=$(date +%s)
@@ -118,6 +121,8 @@ for MAX_SEQ_LENGTH in "${SEQ_LENGTHS[@]}"; do
             --top_k ${TOP_K} \
             --top_p ${TOP_P} \
             --batch_size ${BATCH_SIZE} \
+            --subset test \
+            --language ${LANG} \
             ${STOP_WORDS}
         end_time=$(date +%s)
         time_diff=$((end_time - start_time))
@@ -126,7 +131,8 @@ for MAX_SEQ_LENGTH in "${SEQ_LENGTHS[@]}"; do
     
     python eval/evaluate.py \
         --data_dir ${PRED_DIR} \
-        --benchmark ${BENCHMARK}
+        --benchmark ${BENCHMARK} \
+        --language ${LANG}
 done
 
 echo "Total time spent on call_api: $total_time seconds"

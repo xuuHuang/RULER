@@ -43,7 +43,7 @@ try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
     nltk.download('punkt')
- 
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=Path, required=True, help='dataset folder to save dataset')
@@ -59,6 +59,7 @@ parser.add_argument("--model_template_type", type=str, default='base', help='Opt
 parser.add_argument("--remove_newline_tab", action='store_true', help='remove `\n` and `\t` in all strings.')
 parser.add_argument("--chunk_idx", type=int, default=0, help='index of current split chunk')
 parser.add_argument("--chunk_amount", type=int, default=1, help='size of split chunk')
+parser.add_argument("--language", type=str, default='en', help='The language of the text')
 
 args = parser.parse_args()
 
@@ -120,6 +121,7 @@ def main():
             --num_samples {num_samples} \
             --random_seed {random_seed} \
             {additional_args} \
+            --language {args.language} \
             {f"--remove_newline_tab" if args.remove_newline_tab else ""} \
             {f"--pre_samples {pre_samples}" if config['task'] == 'qa' else ""} \
             --template "{config['template']}"

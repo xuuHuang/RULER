@@ -23,13 +23,19 @@ TASK_NAME: {
 
 TASKS = {
     'niah': {
-        'tokens_to_generate': 128,
+        'tokens_to_generate': 240,
         'template': """Some special magic {type_needle_v} are hidden within the following text. Make sure to memorize it. I will quiz you about the {type_needle_v} afterwards.\n{context}\nWhat are all the special magic {type_needle_v} for {query} mentioned in the provided text?""",
         'answer_prefix': """ The special magic {type_needle_v} for {query} mentioned in the provided text are"""
     },
+
+    'qaiah': {
+        'tokens_to_generate': 64,
+        'template': """Answer the questions based on the given documents. Only give me the answers and do not output any other words.\n\nThe following are given documents.\n\n{context}\n\nAnswer the questions based on the given documents. Only give me the answers and do not output any other words.\n\nQuestions:\n{query}""",
+        'answer_prefix': """\nAnswers:"""
+    },
     
     'variable_tracking': {
-        'tokens_to_generate': 30,
+        'tokens_to_generate': 50,
         'template': """Memorize and track the chain(s) of variable assignment hidden in the following text.\n\n{context}\nQuestion: Find all variables that are assigned the value {query} in the text above.""",
         'answer_prefix': """ Answer: According to the chain(s) of variable assignment in the text above, {num_v} variables are assgined the value {query}, they are: """
     },
@@ -47,7 +53,7 @@ TASKS = {
     },
 
     'qa': {
-        'tokens_to_generate': 32, 
+        'tokens_to_generate': 64, 
         'template': """Answer the question based on the given documents. Only give me the answer and do not output any other words.\n\nThe following are given documents.\n\n{context}\n\nAnswer the question based on the given documents. Only give me the answer and do not output any other words.\n\nQuestion: {query}""",
         'answer_prefix': """ Answer:""",
     },

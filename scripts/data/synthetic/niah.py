@@ -35,13 +35,26 @@ import numpy as np
 from pathlib import Path
 from tqdm import tqdm
 import random
-import wonderwords
-from nemo.collections.asr.parts.utils.manifest_utils import read_manifest, write_manifest
+# import wonderwords
+# from nemo.collections.asr.parts.utils.manifest_utils import read_manifest, write_manifest
 import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")) 
 from tokenizer import select_tokenizer
-from nltk.tokenize import sent_tokenize
+# from nltk.tokenize import sent_tokenize
 
+def write_manifest(output_path, target_manifest, ensure_ascii=True):
+    """
+    Write to manifest file
+
+    Args:
+        output_path (str or Path): Path to output manifest file
+        target_manifest (list): List of manifest file entries
+        ensure_ascii (bool): default is True, meaning the output is guaranteed to have all incoming non-ASCII characters escaped. If ensure_ascii is false, these characters will be output as-is.
+    """
+    with open(output_path, "w", encoding="utf-8") as outfile:
+        for tgt in target_manifest:
+            json.dump(tgt, outfile, ensure_ascii=ensure_ascii)
+            outfile.write('\n')
 
 parser = argparse.ArgumentParser()
 # Basic Configurations
@@ -56,6 +69,7 @@ parser.add_argument("--num_samples", type=int, required=True, help='number of sa
 parser.add_argument("--random_seed", type=int, default=42)
 parser.add_argument("--template", type=str, default='', help='prompt template')
 parser.add_argument("--remove_newline_tab", action='store_true', help='remove `\n` and `\t` in all strings.')
+parser.add_argument("--language", type=str, default='en', help='The language of the text')
 
 # Complexity Configurations
 parser.add_argument("--num_needle_k", type=int, default=1)
@@ -74,13 +88,124 @@ args.num_needle_k = max(args.num_needle_k, args.num_needle_q)
 TOKENIZER = select_tokenizer(args.tokenizer_type, args.tokenizer_path)
 
 # Define Needle/Haystack Format 
-needle = "One of the special magic {type_needle_v} for {key} is: {value}."
+language = args.language
+if args.type_needle_k == "qa":
+    assert args.type_needle_v == "qa"
+    if language == "en":
+        needle = "Document: {document}"
+    elif language == "zh":
+        needle = "文档: {document}"
+    elif language == "es":
+        needle = "Documento: {document}"
+    elif language == "fr":
+        needle = "Document: {document}"
+    elif language == "de":
+        needle = "Dokument: {document}"
+    elif language == "ru":
+        needle = "Документ: {document}"
+    elif language == "ja":
+        needle = "ドキュメント: {document}"
+    elif language == "th":
+        needle = "เอกสาร: {document}"
+    elif language == "sw":
+        needle = "Hati: {document}"
+    elif language == "bn":
+        needle = "নথি: {document}"
+    elif language == "te":
+        needle = "పత్రం: {document}"
+    elif language == "ar":
+        needle = "الوثيقة: {document}"
+    elif language == "ko":
+        needle = "문서: {document}"
+    elif language == "vi":
+        needle = "Tài liệu: {document}"
+    elif language == "cs":
+        needle = "Dokument: {document}"
+    elif language == "hu":
+        needle = "Dokumentum: {document}"
+    elif language == "sr":
+        needle = "Документ: {document}"
+    else:
+        raise NotImplementedError(f'{args.language} is not supported.')
+else:
+    if language == "en":
+        needle = "One of the special magic {type_needle_v} for {key} is: {value}."
+    elif language == "zh":
+        needle = "{key} 的一个特殊魔法 {type_needle_v} 是：{value}。"
+    elif language == "es":
+        needle = "Uno de los {type_needle_v} mágicos especiales para {key} es: {value}."
+    elif language == "fr":
+        needle = "L'un des {type_needle_v} magiques spéciaux pour {key} est: {value}."
+    elif language == "de":
+        needle = "Einer der speziellen magischen {type_needle_v} für {key} ist: {value}."
+    elif language == "ru":
+        needle = "Одним из специальных магических {type_needle_v} для {key} является: {value}."
+    elif language == "ja":
+        needle = "{key} の特別なマジック {type_needle_v} の 1 つは {value} です。"
+    elif language == "th":
+        needle = "หนึ่งในเวทมนตร์พิเศษ {type_needle_v} สำหรับ {key} คือ: {value}"
+    elif language == "sw":
+        needle = "Mojawapo ya uchawi maalum {type_needle_v} kwa {key} ni: {value}."
+    elif language == "bn":
+        needle = "{key}-এর জন্য একটি বিশেষ জাদু {type_needle_v} হল: {value}৷"
+    elif language == "te":
+        needle = "{key} కోసం ప్రత్యేక మ్యాజిక్ {type_needle_v}లో ఒకటి: {value}."
+    elif language == "ar":
+        needle = "أحد السحر الخاص {type_needle_v} لـ {key} هو: {value}."
+    elif language == "ko":
+        needle = "{key}에 대한 특별한 마법 {type_needle_v} 중 하나는 {value}입니다."
+    elif language == "vi":
+        needle = "Một trong những phép thuật đặc biệt {type_needle_v} cho {key} là: {value}."
+    elif language == "cs":
+        needle = "Jedna ze speciálních kouzel {type_needle_v} pro {key} je: {value}."
+    elif language == "hu":
+        needle = "Az egyik speciális {type_needle_v} varázslat a {key} számára: {value}."
+    elif language == "sr":
+        needle = "Једна од специјалних магија {type_needle_v} за {key} је: {value}."
+    else:
+        raise NotImplementedError(f'{args.language} is not supported.')
+
+
 if args.type_haystack == 'essay':
-    essay = os.path.join(os.path.dirname(os.path.abspath(__file__)), "json/PaulGrahamEssays.json")
+    # essay = os.path.join(os.path.dirname(os.path.abspath(__file__)), "json/PaulGrahamEssays.json")
+    essay = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"json/haystack/un_test.{args.language}.json")
     essay = json.load(open(essay))['text']
-    haystack = re.sub(r'\s+', " ", essay).split(" ")
+    haystack = essay.strip().split("\n")
 elif args.type_haystack == 'repeat':
-    haystack = "The grass is green. The sky is blue. The sun is yellow. Here we go. There and back again."
+    if language == "en":
+        haystack = "The grass is green. The sky is blue. The sun is yellow. Here we go. There and back again."
+    elif language == "zh":
+        haystack = "草是绿色的。天空是蓝色的。太阳是黄色的。我们走了。走了一圈又回来了。"
+    elif language == "es":
+        haystack = "El pasto es verde. El cielo es azul. El sol es amarillo. Allá vamos. De ida y vuelta."
+    elif language == "fr":
+        haystack = "L'herbe est verte. Le ciel est bleu. Le soleil est jaune. C'est parti. Aller-retour."
+    elif language == "de":
+        haystack = "Das Gras ist grün. Der Himmel ist blau. Die Sonne ist gelb. Los geht’s. Hin und zurück."
+    elif language == "ru":
+        haystack = "Трава зеленая. Небо голубое. Солнце желтое. Вот мы идем. Туда и обратно."
+    elif language == "ja":
+        haystack = "草は緑。空は青。太陽は黄色。さあ出発。あちこち行って、また戻ってくる。"
+    elif language == "th":
+        haystack = "หญ้าเป็นสีเขียว ท้องฟ้าเป็นสีฟ้า ดวงอาทิตย์เป็นสีเหลือง นี่ไง ไปมาแล้ว กลับมาอีกแล้ว"
+    elif language == "sw":
+        haystack = "Nyasi ni kijani. Anga ni bluu. Jua ni njano. Hapa sisi kwenda. Huko na kurudi tena."
+    elif language == "bn":
+        haystack = "ঘাস সবুজ। আকাশ নীল। সূর্য হলুদ। এই আমরা যাই. সেখানে এবং আবার ফিরে."
+    elif language == "te":
+        haystack = "గడ్డి పచ్చగా ఉంటుంది. ఆకాశం నీలంగా ఉంది. సూర్యుడు పసుపు. ఇదిగో మనం. అక్కడ మరియు తిరిగి."
+    elif language == "ar":
+        haystack = "العشب أخضر والسماء زرقاء والشمس صفراء، ها نحن ذا، هناك ومرة ​​أخرى نعود."
+    elif language == "ko":
+        haystack = "풀은 푸르고, 하늘은 파랗고, 태양은 노랗다. 가자. 저기로, 그리고 다시 돌아오자."
+    elif language == "vi":
+        haystack = "Cỏ xanh. Bầu trời xanh. Mặt trời vàng. Chúng ta đi đây. Đến đó và quay lại."
+    elif language == "cs":
+        haystack = "Tráva je zelená. Obloha je modrá. Slunce je žluté. Tady to je. Tam a zase zpátky."
+    elif language == "hu":
+        haystack = "A fű zöld. Az ég kék. A nap sárga. tessék. Oda és vissza."
+    elif language == "sr":
+        haystack = "Трава је зелена. Небо је плаво. Сунце је жуто. Идемо. Тамо и назад."
 elif args.type_haystack == 'needle':
     haystack = needle
 else:
@@ -88,11 +213,11 @@ else:
 
 
 # Words
-nouns = wonderwords.random_word._get_words_from_text_file("nounlist.txt")
-adjs = wonderwords.random_word._get_words_from_text_file("adjectivelist.txt")
+# nouns = wonderwords.random_word._get_words_from_text_file("nounlist.txt")
+# adjs = wonderwords.random_word._get_words_from_text_file("adjectivelist.txt")
 # verbs = wonderwords.random_word._get_words_from_text_file("verblist.txt")
-words = [f"{adj}-{noun}" for adj in adjs for noun in nouns]
-words = sorted(list(set(words)))
+# words = [f"{adj}-{noun}" for adj in adjs for noun in nouns]
+# words = sorted(list(set(words)))
 
 
 # Positions
@@ -104,9 +229,9 @@ def generate_random_number(num_digits=7):
     upper_bound = 10**num_digits - 1
     return str(random.randint(lower_bound, upper_bound))
 
-def generate_random_word():
-    word = random.choice(words)
-    return word
+# def generate_random_word():
+#     word = random.choice(words)
+#     return word
 
 def generate_random_uuid():
     return str(uuid.UUID(int=random.getrandbits(128), version=4))
@@ -114,8 +239,8 @@ def generate_random_uuid():
 def generate_random(type_needle: str):
     if type_needle == 'numbers':
         return generate_random_number()
-    elif type_needle == 'words':
-        return generate_random_word()
+    # elif type_needle == 'words':
+    #     return generate_random_word()
     elif type_needle == 'uuids':
         return generate_random_uuid()
     else:
@@ -139,8 +264,9 @@ def generate_input_output(num_haystack):
     
     # Context
     if args.type_haystack == 'essay':
-        text = " ".join(haystack[:num_haystack])
-        document_sents = sent_tokenize(text.strip())
+        # text = " ".join(haystack[:num_haystack])
+        # document_sents = sent_tokenize(text.strip())
+        document_sents = haystack[:num_haystack]
         insertion_positions = [0] + \
                               sorted([int(len(document_sents) * (depth / 100)) for depth in random.sample(DEPTHS, len(needles))]) + \
                               [len(document_sents)]
@@ -199,14 +325,14 @@ def generate_samples(num_samples: int, max_seq_length: int, save_dir: str, incre
     tokens_to_generate = args.tokens_to_generate
 
     if args.type_haystack == 'essay':
-        incremental = 500
+        incremental = 10
     elif args.type_haystack == 'repeat':
         incremental = 25
     elif args.type_haystack == 'needle':
         incremental = 25
         
-    if args.type_haystack != 'essay' and args.max_seq_length < 4096:
-        incremental = 5
+    # if args.type_haystack != 'essay' and args.max_seq_length < 4096:
+    #     incremental = 5
 
     num_haystack = incremental
         
@@ -265,7 +391,7 @@ def main():
         save_dir=args.save_dir
     )
 
-    write_manifest(save_file, write_jsons)
+    write_manifest(save_file, write_jsons, False)
 
 if __name__ == "__main__":
     main()

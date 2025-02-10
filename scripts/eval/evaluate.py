@@ -26,11 +26,11 @@ python evaluate.py \
 import re
 import os
 import argparse
-import nltk
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
+# import nltk
+# try:
+#     nltk.data.find('tokenizers/punkt')
+# except LookupError:
+#     nltk.download('punkt')
     
 import pandas as pd
 import importlib
@@ -38,12 +38,64 @@ import yaml
 from pathlib import Path
 from tqdm import tqdm
 from collections import defaultdict
-from nemo.collections.asr.parts.utils.manifest_utils import read_manifest, write_manifest
+import json
+# from nemo.collections.asr.parts.utils.manifest_utils import read_manifest, write_manifest
+
+def read_manifest(manifest):
+    """
+    Read manifest file
+
+    Args:
+        manifest (str or Path): Path to manifest file
+    Returns:
+        data (list): List of JSON items
+    """
+    # manifest = DataStoreObject(str(manifest))
+
+    data = []
+    try:
+        f = open(manifest, 'r', encoding='utf-8')
+    except:
+        raise Exception(f"Manifest file could not be opened: {manifest}")
+
+    errors = []
+    for line in f.readlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            errors.append(line)
+            continue
+        data.append(item)
+    f.close()
+    if errors:
+        print(f"{len(errors)} Errors encountered while reading manifest file: {manifest}")
+        for error in errors:
+            print(f"-- Failed to parse line: `{error}`")
+        raise RuntimeError(f"Errors encountered while reading manifest file: {manifest}")
+    return data
+
+def write_manifest(output_path, target_manifest, ensure_ascii=True):
+    """
+    Write to manifest file
+
+    Args:
+        output_path (str or Path): Path to output manifest file
+        target_manifest (list): List of manifest file entries
+        ensure_ascii (bool): default is True, meaning the output is guaranteed to have all incoming non-ASCII characters escaped. If ensure_ascii is false, these characters will be output as-is.
+    """
+    with open(output_path, "w", encoding="utf-8") as outfile:
+        for tgt in target_manifest:
+            json.dump(tgt, outfile, ensure_ascii=ensure_ascii)
+            outfile.write('\n')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_dir", type=str, required=True, help='path to the prediction jsonl files')
 parser.add_argument("--benchmark", type=str, default='synthetic', help='Options: [synthetic]')
 parser.add_argument("--verbose", type=int, default=0, help='how many lines you want to display.')
+parser.add_argument("--language", type=str, default='en', help="The language of the text")
 args = parser.parse_args()
 
 
@@ -96,7 +148,7 @@ def run_evaluation_per_task(task_config: dict, predictions_file: str, verbose: i
     task_nulls = f'{sum([len(x)==0 for x in predicts])}/{len(predicts)}'
 
     if len(references) > 0 and references[0][0] is not None:
-        task_score = task_config['metric_fn'](predicts, references)
+        task_score = task_config['metric_fn'](predicts, references, args.language)
     else:
         task_score = 0.0
 
@@ -205,10 +257,20 @@ def main():
             predictions_file=os.path.join(args.data_dir, f'{task}.jsonl'),
             task_config=config,
         )
-        eval_results[task] = {
-            'score': task_score,
-            'nulls': task_nulls,
-        }
+        if task.startswith("qaiah") and len(task_score) == 2:
+            eval_results[task + "_em"] = {
+                'score': task_score[0],
+                'nulls': task_nulls,
+            }
+            eval_results[task + "_f1"] = {
+                'score': task_score[1],
+                'nulls': task_nulls,
+            }
+        else:
+            eval_results[task] = {
+                'score': task_score,
+                'nulls': task_nulls,
+            }
         subm_results[task] = {
             'predicts': predicts,
             'indices':indices,

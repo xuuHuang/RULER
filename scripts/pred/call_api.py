@@ -42,7 +42,43 @@ import time
 from tqdm import tqdm
 from pathlib import Path
 import traceback
-from nemo.collections.asr.parts.utils.manifest_utils import read_manifest
+# from nemo.collections.asr.parts.utils.manifest_utils import read_manifest
+
+def read_manifest(manifest):
+    """
+    Read manifest file
+
+    Args:
+        manifest (str or Path): Path to manifest file
+    Returns:
+        data (list): List of JSON items
+    """
+    # manifest = DataStoreObject(str(manifest))
+
+    data = []
+    try:
+        f = open(manifest, 'r', encoding='utf-8')
+    except:
+        raise Exception(f"Manifest file could not be opened: {manifest}")
+
+    errors = []
+    for line in f.readlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            errors.append(line)
+            continue
+        data.append(item)
+    f.close()
+    if errors:
+        print(f"{len(errors)} Errors encountered while reading manifest file: {manifest}")
+        for error in errors:
+            print(f"-- Failed to parse line: `{error}`")
+        raise RuntimeError(f"Errors encountered while reading manifest file: {manifest}")
+    return data
 
 SERVER_TYPES = (
     'trtllm',
@@ -69,6 +105,7 @@ parser.add_argument("--task", type=str, required=True, help='Options: tasks in b
 parser.add_argument("--subset", type=str, default='validation', help='Options: validation or test')
 parser.add_argument("--chunk_idx", type=int, default=0, help='index of current split chunk')
 parser.add_argument("--chunk_amount", type=int, default=1, help='size of split chunk')
+parser.add_argument("--language", type=str, default='en', help="The language of the text")
 
 # Server
 parser.add_argument("--server_type", default='nemo', action=ServerAction, choices=SERVER_TYPES)
@@ -322,7 +359,7 @@ def main():
                 # dump the results in current processing window on disk
                 for idx in range(start_idx, end_idx + 1):
                     if len(outputs_parallel[idx]) > 0:
-                        fout.write(json.dumps(outputs_parallel[idx]) + '\n')
+                        fout.write(json.dumps(outputs_parallel[idx], ensure_ascii=False) + '\n')
 
                 start_idx = end_idx + 1
 
