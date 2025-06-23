@@ -16,20 +16,20 @@
 # wget http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json -O hotpotqa.json
 
 mkdir -p qas
-curl -o qas/xquad_en.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_en.json
-curl -o qas/xquad_zh.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_zh.json
-curl -o qas/xquad_ar.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_ar.json
-curl -o qas/xquad_bn.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_bn.json
-curl -o qas/xquad_cs.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_cs.json
-curl -o qas/xquad_de.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_de.json
-curl -o qas/xquad_es.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_es.json
-curl -o qas/xquad_fr.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_fr.json
-curl -o qas/xquad_hu.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_hu.json
-curl -o qas/xquad_ja.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_ja.json
-curl -o qas/xquad_ko.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_ko.json
-curl -o qas/xquad_ru.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_ru.json
-curl -o qas/xquad_sr.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_sr.json
-curl -o qas/xquad_sw.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_sw.json
-curl -o qas/xquad_te.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_te.json
-curl -o qas/xquad_th.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_th.json
-curl -o qas/xquad_vi.json https://huggingface.co/datasets/ggdcr/Question_answering/resolve/main/qas/xquad_vi.json
+curl -o qas/xquad_en.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_en.json
+curl -o qas/xquad_zh.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_zh.json
+curl -o qas/xquad_ar.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_ar.json
+curl -o qas/xquad_bn.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_bn.json
+curl -o qas/xquad_cs.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_cs.json
+curl -o qas/xquad_de.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_de.json
+curl -o qas/xquad_es.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_es.json
+curl -o qas/xquad_fr.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_fr.json
+curl -o qas/xquad_hu.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_hu.json
+curl -o qas/xquad_ja.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_ja.json
+curl -o qas/xquad_ko.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_ko.json
+curl -o qas/xquad_ru.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_ru.json
+curl -o qas/xquad_sr.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_sr.json
+curl -o qas/xquad_sw.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_sw.json
+curl -o qas/xquad_te.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_te.json
+curl -o qas/xquad_th.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_th.json
+curl -o qas/xquad_vi.json https://huggingface.co/datasets/LLaMAX/BenchMAX_Question_Answering/resolve/main/qas/xquad_vi.json
